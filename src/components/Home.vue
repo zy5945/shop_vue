@@ -9,19 +9,29 @@
     </el-header>
     <!--主题-->
     <el-container>
-      <el-aside width="200px">
-          <el-menu
+      <el-aside :width="isCollapse ? '66px':'200px'">
+          <div class="toggle-button" @click="changeMenuWidth">|||</div>
+          <el-menu :unique-opened="isUniqueOpened"
+                   :collapse="isCollapse"
+                   :collapse-transition="isCollapseTransition"
                   background-color="#bbdff0"
                   text-color="#000"
-                  active-text-color="#ffd04b">
-            <el-submenu index="1">
+                  active-text-color="blue">
+            <el-submenu :index="item.id+''"
+                        v-for="item in menuList"
+                        :key="item.id">
               <template slot="title">
-                <span>导航一</span>
+                <i :class="menuListIcon[item.id]" class="fontI"></i>
+                <span>{{item.authName}}</span>
               </template>
-                <el-menu-item index="1-1">选项1</el-menu-item>
-                <el-menu-item index="1-2">选项2</el-menu-item>
-                <el-menu-item index="1-3">选项3</el-menu-item>
-                <el-menu-item index="1-4">选项4</el-menu-item>
+                <el-menu-item :index="subItem.id+''"
+                              v-for="subItem in item.children"
+                              :key="subItem.id">
+                  <template>
+                    <i class="el-icon-menu"></i>
+                    <span>{{subItem.authName}}</span>
+                  </template>
+                  </el-menu-item>
             </el-submenu>
 
           </el-menu>
@@ -37,11 +47,41 @@
     export default {
         components: {ElButton},
         name: "home",
+        data(){
+          return{
+              menuList:[],
+              menuListIcon:{
+                  125:'el-icon-user-solid',
+                  103:'el-icon-s-claim',
+                  101:'el-icon-shopping-bag-2',
+                  102:'el-icon-tickets',
+                  145:'el-icon-data-line'
+              },
+              isCollapse:false,
+              isUniqueOpened:true,
+              isCollapseTransition:false
+          }
+        },
+        created(){
+           this.getMenuList()
+        },
         methods:{
-            loginOut(){
-                window.sessionStorage.clear();
-                this.$router.push('/login')
-            }
+          loginOut(){
+            window.sessionStorage.clear();
+            this.$router.push('/login')
+          },
+            changeMenuWidth(){
+              console.log(1);
+              this.isCollapse=!this.isCollapse
+            },
+          //  获取菜单
+          async getMenuList(){
+             const {data:res} = await this.$http.get('menus')
+              console.log(res);
+             if(res.meta.status!==200) return this.$message.error(res.meta.$message)
+            this.menuList=res.data;
+              console.log(this.menuList);
+          }
         }
     }
 </script>
@@ -60,6 +100,14 @@
       margin-top:10px;
       float: right;
     }
+
+  }
+  .toggle-button{
+    height:20px;
+    line-height: 20px;
+    letter-spacing: 0.2em;
+    text-align: center;
+    background: #ddd;
   }
   .el-header{
     background-color: #006699;
