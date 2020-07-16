@@ -16,7 +16,10 @@
                    :collapse-transition="isCollapseTransition"
                   background-color="#bbdff0"
                   text-color="#000"
-                  active-text-color="blue">
+                  active-text-color="blue"
+                   :default-active="defaultActive"
+                   router
+                   >
             <el-submenu :index="item.id+''"
                         v-for="item in menuList"
                         :key="item.id">
@@ -24,9 +27,10 @@
                 <i :class="menuListIcon[item.id]" class="fontI"></i>
                 <span>{{item.authName}}</span>
               </template>
-                <el-menu-item :index="subItem.id+''"
+                <el-menu-item :index="'/'+subItem.path"
                               v-for="subItem in item.children"
-                              :key="subItem.id">
+                              :key="subItem.id"
+                              @click="nowIn('/'+subItem.path)">
                   <template>
                     <i class="el-icon-menu"></i>
                     <span>{{subItem.authName}}</span>
@@ -36,7 +40,7 @@
 
           </el-menu>
       </el-aside>
-      <el-main>Main</el-main>
+      <el-main><router-view></router-view></el-main>
     </el-container>
   </el-container>
 </template>
@@ -59,21 +63,26 @@
               },
               isCollapse:false,
               isUniqueOpened:true,
-              isCollapseTransition:false
+              isCollapseTransition:false,
+              defaultActive:''
           }
         },
         created(){
-           this.getMenuList()
+            this.getMenuList()
+            this.defaultActive=window.sessionStorage.getItem('activePath')
         },
         methods:{
           loginOut(){
-            window.sessionStorage.clear();
-            this.$router.push('/login')
+              window.sessionStorage.clear();
+              this.$router.push('/login')
           },
-            changeMenuWidth(){
-              console.log(1);
+          changeMenuWidth(e){
               this.isCollapse=!this.isCollapse
-            },
+          },
+          nowIn(subItemPath){
+              window.sessionStorage.setItem('activePath',subItemPath)
+              this.defaultActive=subItemPath
+          },
           //  获取菜单
           async getMenuList(){
              const {data:res} = await this.$http.get('menus')
@@ -108,6 +117,7 @@
     letter-spacing: 0.2em;
     text-align: center;
     background: #ddd;
+    user-select:none;
   }
   .el-header{
     background-color: #006699;

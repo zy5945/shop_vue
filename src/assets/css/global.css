@@ -4,3 +4,11 @@ html,body,#app{
     margin:0;
     padding:0;
 }
+.TableIndex{
+    text-align: center;
+}
+
+.el-table{
+    margin-top: 50px;
+    border-radius: 5px;
+}

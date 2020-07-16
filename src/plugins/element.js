@@ -12,6 +12,12 @@ import {
     Menu,
     Submenu,
     MenuItem,
+    Breadcrumb,
+    BreadcrumbItem,
+    Card,
+    Table,
+    TableColumn,
+    Switch
 } from 'element-ui'
 
 
@@ -30,6 +36,13 @@ Vue.use(Main)
 Vue.use(Menu)
 Vue.use(Submenu)
 Vue.use(MenuItem)
+Vue.use(Breadcrumb)
+Vue.use(BreadcrumbItem)
+Vue.use(Card)
+Vue.use(Table)
+Vue.use(TableColumn)
+Vue.use(Switch)
+
 Vue.prototype.$message=Message;
 
 
