@@ -16,7 +16,7 @@
         <el-button slot="append" icon="el-icon-search"
                    @click="searchUser"></el-button>
       </el-input>
-      <el-button type="primary">+ 添加用户</el-button>
+      <el-button type="primary" @click="addUser">+ 添加用户</el-button>
       <!--表格-->
       <el-table
               :data="tableList"
@@ -68,7 +68,7 @@
                 label="操作"
                 width="300">
           <template slot-scope="scope">
-            <el-button type="primary" size="small" @click="editUser(scope.row)">
+            <el-button type="primary" size="small" >
               <i class="el-icon-edit"></i>
               <span>编辑</span>
             </el-button>
@@ -96,15 +96,24 @@
     </el-card>
     <!--弹框-->
     <!--编辑用户信息-->
-    <el-dialog title="编辑用户信息" :visible.sync="editModel">
-      <el-form :model="EditForm">
-        <el-form-item label="活动名称" label-width="600px">
-          <el-input v-model="form.name" autocomplete="off"></el-input>
+    <el-dialog title="添加用户" :visible.sync="addUserModel">
+      <el-form :model="addUserForm">
+        <el-form-item label="姓名" label-width="600px">
+          <el-input  autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="活动区域" label-width="600px">
-          <el-select v-model="form.region" placeholder="请选择活动区域">
-            <el-option label="区域一" value="shanghai"></el-option>
-            <el-option label="区域二" value="beijing"></el-option>
+        <el-form-item label="电话" label-width="600px">
+          <el-input  autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="日期" label-width="600px">
+          <el-input  autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="身份" label-width="600px">
+          <el-input  autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="状态" label-width="600px">
+          <el-select placeholder="请选择活动区域">
+            <el-option label="开" value="shanghai"></el-option>
+            <el-option label="关" value="beijing"></el-option>
           </el-select>
         </el-form-item>
       </el-form>
@@ -129,8 +138,8 @@
                 },
                 pageSizes:[2, 10, 20, 50,100],
                 total:0,
-                editModel:false,
-                EditForm:{},
+                addUserModel:false,
+                addUserForm:{},
             }
         },
         created(){
@@ -154,8 +163,8 @@
                    return this.$message.error('用户状态更改失败')
                });
             },
-            editUser(edituser){
-                this.editModel=true
+            addUser(){
+                this.addUserModel=true
             },
             //监听当前页改变
             handleCurrentChange(page){
