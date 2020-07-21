@@ -96,8 +96,7 @@
     </el-card>
     <!--弹框-->
     <!--编辑用户信息-->
-    <el-dialog title="添加用户" :visible.sync="addUserModel"
-    >
+    <el-dialog title="添加用户" :visible.sync="addUserModel">
       <el-form :model="addUserForm"  :rules="addUserRules" ref="addFormRef" label-width="100px" class="addForm">
         <el-form-item label="姓名" prop="username" >
           <el-input  v-model="addUserForm.username"></el-input>
@@ -118,8 +117,7 @@
       </div>
     </el-dialog>
     <!--修改用户信息-->
-    <el-dialog title="修改用户信息" :visible.sync="editUserModel"
-    >
+    <el-dialog title="修改用户信息" :visible.sync="editUserModel">
       <el-form :model="editUserForm"  :rules="editUserRules" ref="editFormRef" label-width="100px" class="addForm">
         <el-form-item label="姓名" prop="username">
           <el-input  v-model="editUserForm.username" :disabled="true"></el-input>
@@ -300,10 +298,7 @@
 </script>
 
 <style scoped>
-  .box-card{
-    margin-top: 20px;
-    padding: 20px;
-  }
+
   .input-with-select{
     margin-right:30px;
     width:300px;

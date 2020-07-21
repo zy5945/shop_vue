@@ -21,7 +21,10 @@ import {
     Pagination,
     Dialog,
     Select,
-    Option
+    Option,
+    Tag,
+    Row,
+    Col
 } from 'element-ui'
 
 
@@ -50,7 +53,9 @@ Vue.use(Pagination)
 Vue.use(Dialog)
 Vue.use(Select)
 Vue.use(Option)
-
+Vue.use(Tag)
+Vue.use(Row)
+Vue.use(Col)
 
 Vue.prototype.$message=Message;
 
