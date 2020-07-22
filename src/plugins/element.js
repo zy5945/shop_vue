@@ -24,7 +24,8 @@ import {
     Option,
     Tag,
     Row,
-    Col
+    Col,
+    MessageBox
 } from 'element-ui'
 
 
@@ -56,11 +57,9 @@ Vue.use(Option)
 Vue.use(Tag)
 Vue.use(Row)
 Vue.use(Col)
-
 Vue.prototype.$message=Message;
 
-
-
+Vue.prototype.$confirm=MessageBox.confirm;
 
 
 

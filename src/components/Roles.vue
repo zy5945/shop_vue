@@ -14,22 +14,60 @@
         </el-col>
       </el-row>
       <el-table
-              :data="tableData"
+              :data="roleList"
               border
+              stripe
               style="width: 100%">
         <el-table-column
-                prop="date"
-                label="日期"
-                width="180">
+                type="expand"
+                width="80">
+          <template slot-scope="scope">
+            <el-row v-for="(item1,i1) in scope.row.children" :key="item1.id" :class="['vcenter','bdbottom',i1===0 ? 'bdtop':'']">
+              <!--一级权限-->
+              <el-col :span="5"><el-tag closable @close="removeTagById(scope.row,item1.id)">{{item1.authName}}</el-tag><i class="el-icon-caret-right"></i></el-col>
+              <!--二。三级权限-->
+              <el-col :span="19">
+                <el-row v-for="(item2,i2) in item1.children" :key="item2.id"  :class="['vcenter',i2===0 ? '':'bdtop']">
+                  <el-col :span="5"><el-tag type="success" closable @close="removeTagById(scope.row,item2.id)">{{item2.authName}}</el-tag><i class="el-icon-caret-right"></i></el-col>
+                  <el-col :span="18">
+                    <el-tag  type="warning"  v-for="item3 in item2.children" :key="item3.id" closable @close="removeTagById(scope.row,item3.id)">{{item3.authName}}</el-tag>
+                  </el-col>
+                </el-row>
+              </el-col>
+            </el-row>
+            <pre>{{scope.row}}</pre>
+          </template>
         </el-table-column>
         <el-table-column
-                prop="name"
-                label="姓名"
-                width="180">
+                class="TableIndex"
+                type="index"
+                label="#"
+                width="80">
         </el-table-column>
         <el-table-column
-                prop="address"
-                label="地址">
+                prop="roleName"
+                label="角色名称">
+        </el-table-column>
+        <el-table-column
+                prop="roleDesc"
+                label="角色描述">
+        </el-table-column>
+        <el-table-column
+                label="操作">
+          <template slot-scope="scope">
+            <el-button type="primary" size="small" >
+              <i class="el-icon-edit"></i>
+              <span>编辑</span>
+            </el-button>
+            <el-button type="danger" size="small" >
+              <i class="el-icon-delete"></i>
+              <span>删除</span>
+            </el-button>
+            <el-button type="warning" size="small">
+              <i class="el-icon-setting"></i>
+              <span>分配权限</span>
+            </el-button>
+          </template>
         </el-table-column>
       </el-table>
     </el-card>
@@ -38,10 +76,56 @@
 
 <script>
     export default {
-        name: "roles"
+        name: "roles",
+        data(){
+            return {
+                roleList:[],
+            }
+        },
+        created(){
+            this.getTableList();
+        },
+        methods:{
+            getTableList(){
+                this.$http.get('roles').then((res)=>{
+                    this.roleList = res.data.data;
+                    console.log(res,this.roleList);
+                    return this.$message.success('请求成功')
+
+                }).catch(()=>{
+                    console.log('失败')
+                })
+
+            },
+           async removeTagById(id1,id2){
+            //    弹框提示用户是否删除
+              const confirmResult=await this.$confirm('此操作将永久删除该权限, 是否继续?', '提示', {
+                    confirmButtonText: '确定',
+                    cancelButtonText: '取消',
+                    type: 'warning'
+                }).catch((err) => err );
+              if(confirmResult!=='confirm') return this.$message.info('取消删除');
+               const {data:res}= await this.$http.delete(`roles/${id1.id}/rights/${id2}`);
+               if(res.meta.status!==200){
+                   return this.$message.error('删除失败')
+               }else{
+                   id1.children =res.data
+               }
+            }
+
+        }
     }
 </script>
 
 <style scoped>
+  .el-tag{
+    margin:6px;
+  }
+  .bdtop{
+    border-top: 1px solid #ddd;
 
+  }
+.bdbottom{
+  border-bottom: 1px solid #ddd;
+}
 </style>

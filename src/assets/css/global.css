@@ -15,3 +15,8 @@ html,body,#app{
     margin-top: 50px;
     border-radius: 5px;
 }
+
+.vcenter{
+    display: flex;
+    align-items: center;
+}
