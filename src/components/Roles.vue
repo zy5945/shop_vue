@@ -63,13 +63,24 @@
               <i class="el-icon-delete"></i>
               <span>删除</span>
             </el-button>
-            <el-button type="warning" size="small">
+            <el-button type="warning" size="small" @click="Distribution">
               <i class="el-icon-setting"></i>
               <span>分配权限</span>
             </el-button>
           </template>
         </el-table-column>
       </el-table>
+      <!--分配权限-->
+      <el-dialog title="分配权限" :visible.sync="Distribute" >
+        <!--树形控件-->
+        <el-tree :data="rightsLists" :props="TreeProps" show-checkbox node-key="id"
+                 :default-expand-all="true"
+        :default-checked-keys="defkeys"></el-tree>
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="Distribute = false">取 消</el-button>
+          <el-button type="primary" @click="Distribute">确 定</el-button>
+        </div>
+      </el-dialog>
     </el-card>
   </div>
 </template>
@@ -80,6 +91,13 @@
         data(){
             return {
                 roleList:[],
+                Distribute:false,
+                rightsLists:[],
+                TreeProps:{
+                    label:'authName',
+                    children:'children',
+                },
+                defkeys:[105,116],
             }
         },
         created(){
@@ -90,14 +108,12 @@
                 this.$http.get('roles').then((res)=>{
                     this.roleList = res.data.data;
                     console.log(res,this.roleList);
-                    return this.$message.success('请求成功')
-
+                    return this.$message.success('请求成功');
                 }).catch(()=>{
                     console.log('失败')
                 })
-
             },
-           async removeTagById(id1,id2){
+            async removeTagById(id1,id2){
             //    弹框提示用户是否删除
               const confirmResult=await this.$confirm('此操作将永久删除该权限, 是否继续?', '提示', {
                     confirmButtonText: '确定',
@@ -107,10 +123,19 @@
               if(confirmResult!=='confirm') return this.$message.info('取消删除');
                const {data:res}= await this.$http.delete(`roles/${id1.id}/rights/${id2}`);
                if(res.meta.status!==200){
-                   return this.$message.error('删除失败')
+                   return this.$message.error('删除失败');
                }else{
                    id1.children =res.data
                }
+            },
+            Distribution(){
+                this.$http.get('rights/tree').then((res)=>{
+                    this.rightsLists=res.data.data;
+                    console.log(this.rightsLists);
+                }).catch(()=>{
+                    console.log('失败')
+                })
+                this.Distribute=true;
             }
 
         }

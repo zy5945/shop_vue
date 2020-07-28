@@ -46,12 +46,7 @@
         name: "right",
         data(){
             return {
-                rightForm:{
-                    authName:'',
-                    path:'',
-                    level:'',
-                    pid:''
-                },
+                rightForm:[],
             }
         },
         created(){
