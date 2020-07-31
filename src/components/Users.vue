@@ -26,14 +26,14 @@
               style="width: 100%">
         <el-table-column
                 class="TableIndex"
-                type="index"
+                 type="index"
                 label="#"
                 width="80">
         </el-table-column>
         <el-table-column
                 prop="username"
-                label="姓名"
-                width="180">
+               label="姓名"
+               width="180">
         </el-table-column>
         <el-table-column
                 prop="mobile"
@@ -160,7 +160,7 @@
         </p>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="DistributeUserModel=false">取 消</el-button>
+        <el-button @click="cancel">取 消</el-button>
         <el-button type="primary" @click="setRoleSure">确 定</el-button>
       </div>
     </el-dialog>
@@ -349,8 +349,8 @@
                       this.DistributeUserModel=false;
                       this.getTableList();
                   }
-
-
+            },
+            cancel(){
 
             }
         }
