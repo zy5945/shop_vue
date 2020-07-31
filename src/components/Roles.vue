@@ -63,7 +63,7 @@
               <i class="el-icon-delete"></i>
               <span>删除</span>
             </el-button>
-            <el-button type="warning" size="small" @click="Distribution">
+            <el-button type="warning" size="small" @click="Distribution(scope.row)">
               <i class="el-icon-setting"></i>
               <span>分配权限</span>
             </el-button>
@@ -71,14 +71,14 @@
         </el-table-column>
       </el-table>
       <!--分配权限-->
-      <el-dialog title="分配权限" :visible.sync="Distribute" >
+      <el-dialog title="分配权限" :visible.sync="Distribute" @close="Cancel">
         <!--树形控件-->
         <el-tree :data="rightsLists" :props="TreeProps" show-checkbox node-key="id"
-                 :default-expand-all="true"
+                 :default-expand-all="true" ref="treeRef"
         :default-checked-keys="defkeys"></el-tree>
         <div slot="footer" class="dialog-footer">
-          <el-button @click="Distribute = false">取 消</el-button>
-          <el-button type="primary" @click="Distribute">确 定</el-button>
+          <el-button @click="Cancel">取 消</el-button>
+          <el-button type="primary" @click="alotRights">确 定</el-button>
         </div>
       </el-dialog>
     </el-card>
@@ -97,7 +97,9 @@
                     label:'authName',
                     children:'children',
                 },
-                defkeys:[105,116],
+                defkeys:[],
+                //当前将分配权限的id
+                roleId:'',
             }
         },
         created(){
@@ -128,17 +130,51 @@
                    id1.children =res.data
                }
             },
-            Distribution(){
-                this.$http.get('rights/tree').then((res)=>{
-                    this.rightsLists=res.data.data;
-                    console.log(this.rightsLists);
-                }).catch(()=>{
-                    console.log('失败')
-                })
-                this.Distribute=true;
-            }
+            async Distribution(role){
+                this.roleId=role.id;
+                const {data:res}= await this.$http.get('rights/tree')
+                if(res.meta.status!==200){
+                    return this.$message.error('请求失败');
+                }else{
+                    this.rightsLists=res.data;
+                    this.getLeafKeys(role,this.defkeys)
+                    this.Distribute=true;
+                }
 
-        }
+
+
+            },
+            //通过递归的形式获取三级权限是id
+            getLeafKeys(node,arr){
+                if(!node.children){
+                    return arr.push(node.id)
+                }
+                node.children.forEach(item=>{
+                    this.getLeafKeys(item,arr)
+                })
+            },
+            //点击拿到分配权限，
+            async alotRights(){
+                const keys=[
+                    ...this.$refs.treeRef.getCheckedKeys(),
+                    ...this.$refs.treeRef.getHalfCheckedKeys()
+                ];
+                const idStr=keys.join(',');
+                const {data:res}=await this.$http.post(`roles/${this.roleId}/rights`,{rids:idStr});
+                console.log(res);
+                if(res.meta.status!==200){
+                    return this.$message.error('修改失败');
+                }
+                 this.$message.success('修改成功');
+                this.Distribute = false;
+                this.getTableList();
+            },
+            Cancel(){
+                this.Distribute = false;
+                this.defkeys=[]
+            }
+        },
+
     }
 </script>
 

@@ -76,9 +76,9 @@
               <i class="el-icon-delete"></i>
               <span>删除</span>
             </el-button>
-            <el-button type="warning" size="small">
+            <el-button type="warning" size="small" title="分配角色" @click="setRole(scope.row)">
               <i class="el-icon-setting"></i>
-              <span>设置</span>
+              <span >设置</span>
             </el-button>
           </template>
         </el-table-column>
@@ -142,6 +142,28 @@
         <el-button type="primary" @click="sureDelete">确 定</el-button>
       </div>
     </el-dialog>
+    <!--分配角色对话框-->
+    <el-dialog title="分配角色" :visible.sync="DistributeUserModel">
+      <div>
+        <p>当前用户：{{userInfo.username}}</p>
+        <p>当前角色：{{userInfo.role_name}}</p>
+        <p>
+          <span>分配新角色</span>
+          <el-select v-model="selectedRoleId" placeholder="请选择">
+            <el-option
+                    v-for="item in roleList"
+                    :key="item.id"
+                    :label="item.roleName"
+                    :value="item.id">
+            </el-option>
+          </el-select>
+        </p>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="DistributeUserModel=false">取 消</el-button>
+        <el-button type="primary" @click="setRoleSure">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -158,6 +180,7 @@
                 },
                 pageSizes:[2, 10, 20, 50,100],
                 total:0,
+                //添加用户对话框
                 addUserModel:false,
                 addUserForm:{
                     username:'',
@@ -173,6 +196,7 @@
                         required:true,message:'请输入密码',trigger:'blur'
                     }]
                 },
+                //编辑用户对话框
                 editUserModel:false,
                 editUserForm:{
                     username:'',
@@ -188,7 +212,16 @@
                     }]
                 },
                 rowUser:{},
+                //删除用户对话框
                 deleteUserModel:false,
+                //分配角色对话框
+                DistributeUserModel:false,
+                //分配角色展示内容
+                userInfo:{},
+                //所有角色
+                roleList:[],
+                //已选中角色id
+                selectedRoleId:''
             }
         },
         created(){
@@ -292,6 +325,33 @@
                 }).catch(()=>{
                     return this.$message.error('删除失败')
                 });
+            },
+            setRole(userInfo){
+                this.userInfo = userInfo;
+                //展示决策之前获取角色列表
+                this.$http.get('roles').then((res)=>{
+                    this.roleList=res.data.data
+                    console.log(res.data,this.roleList);
+                }).catch(()=>{
+                    console.log('失败');
+                })
+                this.DistributeUserModel=true;
+            },
+           async setRoleSure(){
+                if(!this.selectedRoleId){
+                    return this.$message.error('请选择用户角色')
+                }
+              const {data:res}=await this.$http.put(`users/${this.userInfo.id}/role`,{rid:this.selectedRoleId});
+               console.log(res);
+               if(res.meta.status!==200){
+                      return this.$message.error(res.meta.msg)
+                  }else{
+                      this.DistributeUserModel=false;
+                      this.getTableList();
+                  }
+
+
+
             }
         }
     }
