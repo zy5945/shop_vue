@@ -8,38 +8,39 @@
     </el-breadcrumb>
     <el-card class="box-card">
       <el-button type="primary">添加分类</el-button>
+      <tree-table :data="tableList"
+                  :columns="columns"
+                  show-index
+                  border
+                  :expand-type="false"
+                  :selection-type="false"
+      >
+        <template slot="isok" slot-scope="scope">
+          <i class="el-icon-success" v-if="scope.row.cat_deleted"
+          style="color:green"></i>
+          <i class="el-icon-error" v-if="!scope.row.cat_deleted"
+             style="color:red"></i>
+        </template>
+        <template slot="order" slot-scope="scope">
+          <el-tag v-if="scope.row.cat_level===0" type="success">一级</el-tag>
+          <el-tag v-else-if="scope.row.cat_level===1" >二级</el-tag>
+          <el-tag v-else-if="scope.row.cat_level===2" type="warning">三级</el-tag>
+        </template>
+        <template slot="opt" slot-scope="scope">
+          <el-button type="primary">编辑</el-button>
+          <el-button type="danger" >删除</el-button>
+        </template>
+      </tree-table>
+      <el-pagination
+              @size-change="handleSizeChange"
+              @current-change="handleCurrentChange"
+              :current-page="queryInfo.pagenum"
+              :page-sizes="[2, 5, 10, 50]"
+              :page-size="queryInfo.pagesize"
+              layout="total, sizes, prev, pager, next, jumper"
+              :total="total">
+      </el-pagination>
     </el-card>
-    <el-table
-            :data="tableList"
-            height="250"
-            border
-            stripe
-            style="width: 100%">
-        <el-table-column
-                class="TableIndex"
-                 type="index"
-                label="#"
-                width="80"></el-table-column>
-        <el-table-column
-                prop="cat_name"
-                label="分类名称"></el-table-column>
-        <el-table-column
-                prop="cat_deleted"
-                label="是否有效"></el-table-column>
-        <el-table-column
-                prop="cat_level"
-                label="排序"></el-table-column>
-    </el-table>
-    <el-pagination
-            @size-change="handleSizeChange"
-            @current-change="handleCurrentChange"
-            :current-page="queryInfo.pagenum"
-            :page-sizes="[2, 5, 10, 50]"
-            :page-size="queryInfo.pagesize"
-            layout="total, sizes, prev, pager, next, jumper"
-            :total="total"
-         >
-    </el-pagination>
   </div>
 </template>
 
@@ -54,7 +55,29 @@
                     pagesize:5
                 },
                 tableList:[],
-                total:0
+                total:0,
+                columns:[
+                    {
+                        label:'分类名称',
+                        prop:'cat_name'
+                    },
+                    {
+                        label:'是否有效',
+                        type:'template',
+                        template:'isok'
+                    },
+                    {
+                        label:'排序',
+                        type:'template',
+                        template:'order'
+                    },
+                    {
+                        label:'操作',
+                        type:'template',
+                        template:'opt'
+                    }
+
+                ]
             }
         },
         created(){
