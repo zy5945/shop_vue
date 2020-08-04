@@ -7,7 +7,7 @@
       <el-breadcrumb-item>商品分类</el-breadcrumb-item>
     </el-breadcrumb>
     <el-card class="box-card">
-      <el-button type="primary">添加分类</el-button>
+      <el-button type="primary" @click="showAddBox">添加分类</el-button>
       <tree-table :data="tableList"
                   :columns="columns"
                   show-index
@@ -41,6 +41,30 @@
               :total="total">
       </el-pagination>
     </el-card>
+    <!--添加分类对话框-->
+    <el-dialog title="添加分类" :visible.sync="addGoods" >
+      <el-form :model="addForm" label-width="100px" >
+        <el-form-item label="分类名称" >
+          <el-input v-model="addForm.cat_name" ></el-input>
+        </el-form-item>
+        <el-form-item label="父级分类" >
+          <!--options 用来指定数据源-->
+          <!--props   用来指定配置对象-->
+          <el-cascader
+                  expandTrigger="hover"
+                  size="medium"
+                  v-model="selcetedKeys"
+                  :options="parentCateList"
+                  :props="cascaderProps"
+                  clearable
+                  @change="parentCateChange"></el-cascader>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="cancel">取 消</el-button>
+        <el-button type="primary" @click="sureAdd">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -76,8 +100,24 @@
                         type:'template',
                         template:'opt'
                     }
-
-                ]
+                ],
+                addForm:{
+                    cat_pid:0,
+                    cat_name:'',
+                    cat_level:0
+                },
+                //控制添加分类对话框显示与隐藏
+                addGoods:false,
+            //   父级分类列表
+                parentCateList:[],
+            //    指定级联选择器的配置对象
+                cascaderProps:{
+                    value:'cat_id',
+                    label:'cat_name',
+                    children:'children'
+                },
+                //选中的分类id数组
+                selcetedKeys:[]
             }
         },
         created(){
@@ -103,10 +143,35 @@
                 this.queryInfo.pagesize=pages;
                 this.getTableList()
             },
+            showAddBox(){
+                this.getParentList();
+                this.addGoods=true;
+            },
+            sureAdd(){
+                this.addGoods=false;
+            },
+            getParentList(){
+                this.$http.get('categories',{params:{type:2}}).then((res)=>{
+                    console.log(res);
+                    this.parentCateList=res.data.data
+                }).catch(()=>{
+                    return this.$message.error('请求失败')
+                })
+            },
+            parentCateChange(){
+                console.log(this.selcetedKeys);
+            },
+            cancel(){
+                this.addGoods=false;
+            }
         }
     }
 </script>
 
 <style scoped>
-
+.el-cascader{
+  width:100%;
+  height:100px;
+  overflow: auto;
+}
 </style>

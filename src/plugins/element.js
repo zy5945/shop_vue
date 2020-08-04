@@ -26,7 +26,8 @@ import {
     Row,
     Col,
     MessageBox,
-    Tree
+    Tree,
+    Cascader
 } from 'element-ui'
 
 
@@ -59,6 +60,7 @@ Vue.use(Tag)
 Vue.use(Row)
 Vue.use(Col)
 Vue.use(Tree)
+Vue.use(Cascader)
 Vue.prototype.$message=Message;
 
 Vue.prototype.$confirm=MessageBox.confirm;
