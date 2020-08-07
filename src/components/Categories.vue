@@ -51,13 +51,16 @@
           <!--options 用来指定数据源-->
           <!--props   用来指定配置对象-->
           <el-cascader
+                  id="sel"
                   expandTrigger="hover"
                   size="medium"
                   v-model="selcetedKeys"
                   :options="parentCateList"
                   :props="cascaderProps"
                   clearable
-                  @change="parentCateChange"></el-cascader>
+                  change-on-select
+                  @change="parentCateChange"
+          ></el-cascader>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -148,6 +151,7 @@
                 this.addGoods=true;
             },
             sureAdd(){
+                console.log(this.addForm);
                 this.addGoods=false;
             },
             getParentList(){
@@ -160,6 +164,14 @@
             },
             parentCateChange(){
                 console.log(this.selcetedKeys);
+                if(this.selcetedKeys.length>0){
+                    this.addForm.cat_pid=this.selcetedKeys[this.selcetedKeys.length-1];
+                    this.addForm.cat_level=this.selcetedKeys.length;
+                    return
+                }else{
+                    this.addForm.cat_pid=0;
+                    this.addForm.cat_level=0;
+                }
             },
             cancel(){
                 this.addGoods=false;
@@ -171,7 +183,5 @@
 <style scoped>
 .el-cascader{
   width:100%;
-  height:100px;
-  overflow: auto;
 }
 </style>
