@@ -42,15 +42,16 @@
       </el-pagination>
     </el-card>
     <!--添加分类对话框-->
-    <el-dialog title="添加分类" :visible.sync="addGoods" >
-      <el-form :model="addForm" label-width="100px" >
-        <el-form-item label="分类名称" >
+    <el-dialog title="添加分类" :visible.sync="addGoods" @close="addCateclose">
+      <el-form :model="addForm" label-width="100px" ref="addFormRef">
+        <el-form-item label="分类名称" prop="cat_name">
           <el-input v-model="addForm.cat_name" ></el-input>
         </el-form-item>
         <el-form-item label="父级分类" >
           <!--options 用来指定数据源-->
           <!--props   用来指定配置对象-->
           <el-cascader
+                  ref="cascader"
                   id="sel"
                   expandTrigger="hover"
                   size="medium"
@@ -60,12 +61,14 @@
                   clearable
                   change-on-select
                   @change="parentCateChange"
+
           ></el-cascader>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="cancel">取 消</el-button>
-        <el-button type="primary" @click="sureAdd">确 定</el-button>
+        <!--@click="sureAdd"-->
+        <el-button type="primary" @click="addSure">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -150,9 +153,13 @@
                 this.getParentList();
                 this.addGoods=true;
             },
-            sureAdd(){
-                console.log(this.addForm);
-                this.addGoods=false;
+            addCateclose(){
+                console.log(this.addForm,this.$refs);
+                this.$refs.addFormRef.resetFields();
+                this.$refs.cascader.handleClear();
+                this.addForm.selcetedKeys=[];
+                this.addForm.cat_pid=0;
+                this.addForm.cat_level=0;
             },
             getParentList(){
                 this.$http.get('categories',{params:{type:2}}).then((res)=>{
@@ -172,6 +179,14 @@
                     this.addForm.cat_pid=0;
                     this.addForm.cat_level=0;
                 }
+            },
+            addSure(){
+                this.$http.post(`categories`,this.addForm).then(()=>{
+                    this.getTableList();
+                    this.addGoods=false;
+                }).catch(()=>{
+                    return this.$message.error('添加失败')
+                })
             },
             cancel(){
                 this.addGoods=false;
