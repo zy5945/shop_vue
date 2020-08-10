@@ -35,7 +35,6 @@
                 </el-row>
               </el-col>
             </el-row>
-            <pre>{{scope.row}}</pre>
           </template>
         </el-table-column>
         <el-table-column
@@ -81,6 +80,22 @@
           <el-button type="primary" @click="alotRights">确 定</el-button>
         </div>
       </el-dialog>
+      <!--编辑角色弹框-->
+      <el-dialog title="编辑角色" :visible.sync="editRoles" @close="Cancel">
+        <el-form :model="editForm" label-width="100px">
+          <el-form-item  label="角色名称" prop="roleName">
+            <el-input></el-input>
+          </el-form-item>
+          <el-form-item  label="角色描述" prop="roleDesc">
+            <el-input></el-input>
+          </el-form-item>
+        </el-form>
+
+        <div slot="footer" class="dialog-footer">
+          <el-button @click="Cancel">取 消</el-button>
+          <el-button type="primary" @click="alotRights">确 定</el-button>
+        </div>
+      </el-dialog>
     </el-card>
   </div>
 </template>
@@ -92,6 +107,7 @@
             return {
                 roleList:[],
                 Distribute:false,
+                editRoles:false,
                 rightsLists:[],
                 TreeProps:{
                     label:'authName',

@@ -27,8 +27,8 @@
           <el-tag v-else-if="scope.row.cat_level===2" type="warning">三级</el-tag>
         </template>
         <template slot="opt" slot-scope="scope">
-          <el-button type="primary">编辑</el-button>
-          <el-button type="danger" >删除</el-button>
+          <el-button type="primary" @click="showEditModel(scope.row)">编辑</el-button>
+          <el-button type="danger" @click="showDelModel(scope.row)">删除</el-button>
         </template>
       </tree-table>
       <el-pagination
@@ -69,6 +69,28 @@
         <el-button @click="cancel">取 消</el-button>
         <!--@click="sureAdd"-->
         <el-button type="primary" @click="addSure">确 定</el-button>
+      </div>
+    </el-dialog>
+    <!--编辑分类名称弹框-->
+    <el-dialog title="修改分类" :visible.sync="editGoods">
+      <el-form :model="editForm" label-width="100px" ref="editFormRef">
+        <el-form-item label="分类名称" prop="cat_name">
+          <el-input v-model="editForm.cat_name" ></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="cancel">取 消</el-button>
+        <!--@click="sureAdd"-->
+        <el-button type="primary" @click="editSure">确 定</el-button>
+      </div>
+    </el-dialog>
+    <!--确定删除弹框-->
+    <el-dialog title="修改分类" :visible.sync="delGoods">
+      <div><i class="el-icon-warning"></i>此操作将永久删除该分类，是否继续？</div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="cancel">取 消</el-button>
+        <!--@click="sureAdd"-->
+        <el-button type="primary" @click="delSure">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -114,6 +136,8 @@
                 },
                 //控制添加分类对话框显示与隐藏
                 addGoods:false,
+                editGoods:false,
+                delGoods:false,
             //   父级分类列表
                 parentCateList:[],
             //    指定级联选择器的配置对象
@@ -123,7 +147,11 @@
                     children:'children'
                 },
                 //选中的分类id数组
-                selcetedKeys:[]
+                selcetedKeys:[],
+                editForm:{
+                    cat_name:''
+                },
+                del_id:0,
             }
         },
         created(){
@@ -180,6 +208,15 @@
                     this.addForm.cat_level=0;
                 }
             },
+            showEditModel(row){
+                console.log(row);
+                this.editForm=row;
+                this.editGoods=true;
+            },
+            showDelModel(row){
+                this.del_id=row.cat_id;
+                this.delGoods=true;
+            },
             addSure(){
                 this.$http.post(`categories`,this.addForm).then(()=>{
                     this.getTableList();
@@ -188,8 +225,28 @@
                     return this.$message.error('添加失败')
                 })
             },
+            editSure(){
+                this.$http.put(`categories/${this.editForm.cat_id}`,this.editForm).then(()=>{
+                    this.getTableList();
+                    this.editGoods=false;
+                    return this.$message.success('修改成功')
+                }).catch(()=>{
+                    return this.$message.error('修改失败')
+                })
+            },
+            delSure(){
+                this.$http.delete(`categories/${this.del_id}`,this.del_id).then(()=>{
+                    this.queryInfo.pagenum=1;
+                    this.getTableList();
+                    this.delGoods=false;
+                    return this.$message.success('删除成功')
+                }).catch(()=>{
+                    return this.$message.error('删除失败')
+                })
+            },
             cancel(){
                 this.addGoods=false;
+                this.editGoods=false;
             }
         }
     }
@@ -199,4 +256,8 @@
 .el-cascader{
   width:100%;
 }
+  .el-icon-warning{
+    color:orange;
+    font-size:16px;
+  }
 </style>
