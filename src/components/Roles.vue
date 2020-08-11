@@ -54,11 +54,11 @@
         <el-table-column
                 label="操作">
           <template slot-scope="scope">
-            <el-button type="primary" size="small" >
+            <el-button type="primary" size="small" @click="editRolesModel(scope.row)">
               <i class="el-icon-edit"></i>
               <span>编辑</span>
             </el-button>
-            <el-button type="danger" size="small" >
+            <el-button type="danger" size="small" @click="delRolesModel(scope.row)">
               <i class="el-icon-delete"></i>
               <span>删除</span>
             </el-button>
@@ -69,34 +69,41 @@
           </template>
         </el-table-column>
       </el-table>
-      <!--分配权限-->
-      <el-dialog title="分配权限" :visible.sync="Distribute" @close="Cancel">
-        <!--树形控件-->
-        <el-tree :data="rightsLists" :props="TreeProps" show-checkbox node-key="id"
-                 :default-expand-all="true" ref="treeRef"
-        :default-checked-keys="defkeys"></el-tree>
-        <div slot="footer" class="dialog-footer">
-          <el-button @click="Cancel">取 消</el-button>
-          <el-button type="primary" @click="alotRights">确 定</el-button>
-        </div>
-      </el-dialog>
-      <!--编辑角色弹框-->
-      <el-dialog title="编辑角色" :visible.sync="editRoles" @close="Cancel">
-        <el-form :model="editForm" label-width="100px">
-          <el-form-item  label="角色名称" prop="roleName">
-            <el-input></el-input>
-          </el-form-item>
-          <el-form-item  label="角色描述" prop="roleDesc">
-            <el-input></el-input>
-          </el-form-item>
-        </el-form>
-
-        <div slot="footer" class="dialog-footer">
-          <el-button @click="Cancel">取 消</el-button>
-          <el-button type="primary" @click="alotRights">确 定</el-button>
-        </div>
-      </el-dialog>
     </el-card>
+    <!--分配权限-->
+    <el-dialog title="分配权限" :visible.sync="Distribute" @close="Cancel">
+      <!--树形控件-->
+      <el-tree :data="rightsLists" :props="TreeProps" show-checkbox node-key="id"
+               :default-expand-all="true" ref="treeRef"
+               :default-checked-keys="defkeys"></el-tree>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="Cancel">取 消</el-button>
+        <el-button type="primary" @click="alotRights">确 定</el-button>
+      </div>
+    </el-dialog>
+    <!--编辑角色弹框-->
+    <el-dialog title="编辑角色" :visible.sync="editRoles" @close="Cancel">
+      <el-form :model="editForm" label-width="100px">
+        <el-form-item  label="角色名称" prop="roleName">
+          <el-input v-model="editForm.roleName"></el-input>
+        </el-form-item>
+        <el-form-item  label="角色描述" prop="roleDesc">
+          <el-input v-model="editForm.roleDesc"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="Cancel">取 消</el-button>
+        <el-button type="primary" @click="editSure">确 定</el-button>
+      </div>
+    </el-dialog>
+    <!--确定删除弹框-->
+    <el-dialog title="修改分类" :visible.sync="delRoles">
+      <div><i class="el-icon-warning"></i>此操作将永久删除该角色，是否继续？</div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="cancel">取 消</el-button>
+        <el-button type="primary" @click="delSure">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -108,10 +115,15 @@
                 roleList:[],
                 Distribute:false,
                 editRoles:false,
+                delRoles:false,
                 rightsLists:[],
                 TreeProps:{
                     label:'authName',
                     children:'children',
+                },
+                editForm:{
+                    roleName:'',
+                    roleDesc:''
                 },
                 defkeys:[],
                 //当前将分配权限的id
@@ -125,10 +137,8 @@
             getTableList(){
                 this.$http.get('roles').then((res)=>{
                     this.roleList = res.data.data;
-                    console.log(res,this.roleList);
-                    return this.$message.success('请求成功');
                 }).catch(()=>{
-                    console.log('失败')
+                    return this.$message.error('请求失败');
                 })
             },
             async removeTagById(id1,id2){
@@ -185,8 +195,40 @@
                 this.Distribute = false;
                 this.getTableList();
             },
+            editRolesModel(row){
+                console.log(row);
+                this.$http.get(`roles/${row.id}`).then((res)=>{
+                    this.editForm=res.data.data;
+                    this.editRoles=true;
+                    this.roleId=this.editForm.roleId;
+                })
+            },
+            editSure(){
+                this.$http.put(`roles/${this.roleId}`,this.editForm).then(()=>{
+                    this.getTableList();
+                    this.editRoles=false;
+                    this.$message.success('修改成功');
+                }).catch(()=>{
+                    return this.$message.error('修改失败');
+                })
+            },
+            delRolesModel(row){
+                this.delRoles=true;
+                this.roleId=row.id;
+            },
+            delSure(){
+                this.$http.delete(`roles/${this.roleId}`).then(()=>{
+                    this.getTableList();
+                    this.delRoles=false;
+                    this.$message.success('删除成功');
+                }).catch(()=>{
+                    return this.$message.error('删除失败');
+                })
+            },
             Cancel(){
                 this.Distribute = false;
+                this.editRoles=false;
+                this.delRoles=false;
                 this.defkeys=[]
             }
         },
@@ -205,4 +247,7 @@
 .bdbottom{
   border-bottom: 1px solid #ddd;
 }
+  .el-icon-warning{
+    color:orange;
+  }
 </style>

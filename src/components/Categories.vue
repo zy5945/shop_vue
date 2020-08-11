@@ -247,6 +247,7 @@
             cancel(){
                 this.addGoods=false;
                 this.editGoods=false;
+                this.delGoods=false;
             }
         }
     }
