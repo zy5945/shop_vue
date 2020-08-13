@@ -15,6 +15,18 @@ axios.interceptors.request.use(config=>{
 Vue.config.productionTip = false;
 Vue.prototype.$http=axios;
 Vue.component('tree-table',TreeTable);
+Vue.filter('dateFormat',function(dates){
+    let date=new Date(dates)
+    let y = date.getFullYear();
+    let m = date.getMonth() + 1;
+    m = m < 10 ? '0' + m : m;
+    let d = date.getDate();
+    d = d < 10 ? ('0' + d) : d;
+    let e= date.getHours(); //小时
+    let f= date.getMinutes(); //分
+    let g= date.getSeconds()
+    return y + '-' + m + '-' + d+' '+e+':'+f+':'+g;
+})
 new Vue({
   router,
   render: h => h(App)

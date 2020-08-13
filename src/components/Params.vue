@@ -32,10 +32,21 @@
       <el-tabs v-model="activeName" @tab-click="tabChange">
         <el-tab-pane label="动态参数" name="many">
           <el-button type="primary" :disabled="isBtnDisabled" @click="addmany">添加参数</el-button>
-          <el-table :data="manyData" border stripe>
-            <el-table-column type="expend" width="300">
-              <template slot-scope="scope">
-                {{scope.row}}
+          <el-table :data="manyData" border stripe >
+            <el-table-column type="expand">
+              <template  slot-scope="scope">
+                <el-tag v-for="(item,i) in scope.row.attr_vals" :key="i" closable
+                @close="handleInputClose(i,scope.row)">{{item}}</el-tag>
+                <el-input
+                        class="input-new-tag"
+                        v-if="inputVisible"
+                        v-model="inputValue"
+                        size="small"
+                        @keyup.enter.native="handleInputConfirm(scope.row)"
+                        @blur="handleInputConfirm(scope.row)"
+                >
+                </el-input>
+                <el-button v-else class="button-new-tag" size="small" @click="showInput">+ New Tag</el-button>
               </template>
             </el-table-column>
             <el-table-column type="index"></el-table-column>
@@ -51,7 +62,22 @@
         <el-tab-pane label="静态属性" name="only">
           <el-button type="primary" :disabled="isBtnDisabled" @click="addonly">添加属性</el-button>
           <el-table :data="onlyData" border stripe >
-            <el-table-column type="expend" width="50"></el-table-column>
+            <el-table-column type="expand">
+              <template  slot-scope="scope">
+                <el-tag v-for="(item,i) in scope.row.attr_vals" :key="i" closable
+                        @close="handleInputClose(i,scope.row)">{{item}}</el-tag>
+                <el-input
+                        class="input-new-tag"
+                        v-if="inputVisible"
+                        v-model="inputValue"
+                        size="small"
+                        @keyup.enter.native="handleInputConfirm(scope.row)"
+                        @blur="handleInputConfirm(scope.row)"
+                >
+                </el-input>
+                <el-button v-else class="button-new-tag" size="small" @click="showInput">+ New Tag</el-button>
+              </template>
+            </el-table-column>
             <el-table-column type="index"></el-table-column>
             <el-table-column label="属性名称" prop="attr_name"></el-table-column>
             <el-table-column label="操作" prop="attr_name">
@@ -160,6 +186,9 @@
                 editOnlyModel:false,
                 delManyModel:false,
                 delOnlyModel:false,
+            //    添加attr_vals
+                inputVisible:false,
+                inputValue:''
             }
         },
         created(){
@@ -181,11 +210,16 @@
             getCategories(){
                 if(this.selectedKeys.length!==3) {
                     this.selectedKeys=[];
+                    this.manyData=[];
+                    this.onlyData=[];
                     return
                 }
                 this.$http.get(`categories/${this.cateId}/attributes`,
                     {params:{sel:this.activeName}})
                     .then((res)=>{
+                        res.data.data.forEach((item)=>{
+                            item.attr_vals=item.attr_vals? item.attr_vals.split(','):[]
+                        })
                         if(this.activeName==='many'){
                           this.manyData=res.data.data;
                             console.log(this.manyData);
@@ -291,7 +325,35 @@
                 this.editOnlyModel=false;
                 this.delManyModel=false;
                 this.delOnlyModel=false;
+            },
+            showInput(){
+                this.inputVisible=true;
+            },
+            handleInputConfirm(row){
+                if( this.inputValue==='') {
+                    return
+                };
+                row.attr_vals.push(this.inputValue);
+                row.attr_vals.join(',');
+                this.sendParam(row)
+                console.log(row);
+            },
+            sendParam(row){
+                console.log(this.addManyForm);
+                this.$http.put(`categories/${this.cateId}/attributes/${row.attr_id}`,
+                    {attr_name:row.attr_name,attr_sel:row.attr_sel,attr_vals:row.attr_vals.join(',')})
+                    .then(()=>{
+                        this.inputValue='';
+                        this.inputVisible=false;
+                    }).catch(()=>{
+                    this.$message.error('添加参数失败')
+                })
+            },
+            handleInputClose(i,row){
+                row.attr_vals.splice(i,1);
+                this.sendParam(row)
             }
+
         },
         computed:{
             isBtnDisabled(){
@@ -313,5 +375,20 @@
 <style scoped>
   .el-row{
     margin:15px 0;
+  }
+  .el-tag + .el-tag {
+    margin-left: 10px;
+  }
+  .button-new-tag {
+    margin-left: 10px;
+    height: 32px;
+    line-height: 30px;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  .input-new-tag {
+    width: 90px;
+    margin-left: 10px;
+    vertical-align: bottom;
   }
 </style>
