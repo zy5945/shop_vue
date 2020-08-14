@@ -31,7 +31,9 @@ import {
     Alert,
     Tabs,
     TabPane,
-    tooltip
+    Tooltip,
+    Steps,
+    Step
 
 } from 'element-ui'
 
@@ -69,7 +71,9 @@ Vue.use(Cascader)
 Vue.use(Alert)
 Vue.use(Tabs)
 Vue.use(TabPane)
-Vue.use(tooltip)
+Vue.use(Tooltip)
+Vue.use(Steps)
+Vue.use(Step)
 Vue.prototype.$message=Message;
 
 Vue.prototype.$confirm=MessageBox.confirm;
