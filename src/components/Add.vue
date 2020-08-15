@@ -15,35 +15,35 @@
               center
               :closable="false">
       </el-alert>
-      <el-steps :active="1" align-center>
+      <el-steps :active="stepActive" align-center finish-status="success">
         <el-step v-for="(item,i) in steps" :title="item.title" :key="i"></el-step>
       </el-steps>
       <div id="fillInfo">
         <div class="active boxs" :data-index="0">
-          <el-form :data="addFrom" label-width="100px" style="width:800px">
+          <el-form :model="addForm" label-width="100px" style="width:800px" :rules="rules" ref="addForm">
             <el-form-item prop="goods_name" label="商品名称">
-              <el-input v-model="addFrom.goods_name"></el-input>
+              <el-input v-model="addForm.goods_name"></el-input>
             </el-form-item>
             <el-form-item prop="goods_price" label="商品价格">
-              <el-input v-model="addFrom.goods_price"></el-input>
+              <el-input v-model="addForm.goods_price"></el-input>
             </el-form-item>
             <el-form-item prop="goods_number" label="商品数量">
-              <el-input v-model="addFrom.goods_number"></el-input>
+              <el-input v-model="addForm.goods_number"></el-input>
             </el-form-item>
             <el-form-item prop="goods_weight" label="商品重量">
-              <el-input v-model="addFrom.goods_weight"></el-input>
+              <el-input v-model="addForm.goods_weight"></el-input>
             </el-form-item>
-            <el-form-item label="商品分类">
+            <el-form-item label="商品分类" prop="selectedKeys">
               <el-cascader
                       expandTrigger="hover"
-                      v-model="selectedKeys"
+                      v-model="addForm.selectedKeys"
                       :options="cataList"
                       :props="cataProps"
                       clearable>
               </el-cascader>
             </el-form-item>
             <el-form-item style="text-align: center">
-              <el-button type="primary" @click="nextStep1" class="next-step">下一步</el-button>
+              <el-button type="primary" @click="nextStep1('addForm')" class="next-step">下一步</el-button>
             </el-form-item>
           </el-form>
         </div>
@@ -76,9 +76,12 @@
           <el-form>
             <el-form-item style="text-align: center">
               <el-button type="primary" @click="preStep" class="pre-step">上一步</el-button>
-              <el-button type="primary" @click="nextStep5" class="next-step">下一步</el-button>
+              <el-button type="primary" @click="nextStep5" class="next-step">提交</el-button>
             </el-form-item>
           </el-form>
+        </div>
+        <div class="boxs" :data-index="5">商品内容
+          完成！静待跳转。。。
         </div>
       </div>
     </el-card>
@@ -100,8 +103,26 @@
                     {title: '商品内容'},
                     {title: '完成'},
                 ],
-                addFrom: {},
-                selectedKeys: [],
+                addForm: {
+                    selectedKeys: [],
+                },
+                rules: {
+                    goods_name: [
+                        { required: true, message: '请输入活动名称', trigger: 'blur' }
+                    ],
+                    goods_price: [
+                        {required: true, message: '请输入活动名称', trigger: 'blur'}
+                    ],
+                    goods_number: [
+                        {required: true, message: '请输入活动名称', trigger: 'blur' }
+                    ],
+                    goods_weight: [
+                        {required: true, message: '请输入活动名称', trigger: 'blur' }
+                    ],
+                    selectedKeys:[
+                        {required: true, message: '请输入活动名称', trigger: 'change' }
+                    ]
+                },
                 cataList: [],
                 cataProps: {
                     value: 'cat_id',
@@ -128,9 +149,18 @@
                 $(`.boxs`).removeClass('active')
                 $(`.boxs[data-index=${_this.step}]`).addClass('active')
             },
-            nextStep1() {
-                this.step = 1;
-                this.showBox()
+            nextStep1(addForm) {
+                console.log(this.$refs);
+                this.$refs[addForm].validate((valid) => {
+                    if (valid) {
+                        this.step = 1;
+                        this.showBox()
+                    } else {
+                        this.$message.error('请补全基本信息！')
+                        return false;
+                    }
+                });
+
             },
             nextStep2() {
                 this.step = 2;
@@ -146,6 +176,10 @@
             },
             nextStep5() {
                 this.step = 5;
+                const _this=this;
+                setTimeout(()=>{
+                    _this.step=6
+                },500)
                 this.showBox()
             },
             preStep() {
@@ -153,7 +187,11 @@
                 this.showBox()
             }
         },
-
+        computed:{
+            stepActive(){
+                return this.step;
+            }
+        }
     }
 </script>
 
