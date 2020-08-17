@@ -4,7 +4,12 @@ import router from './router';
 import './plugins/element.js';
 import './assets/css/global.css';
 import axios from 'axios';
+import VueQuillEditor from 'vue-quill-editor';
 import TreeTable from 'vue-table-with-tree-grid';
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
+Vue.use(VueQuillEditor)
 axios.defaults.baseURL='http://127.0.0.1:8888/api/private/v1/';
 //通过axios请求拦截器添加token，确保有获取数据的权限。
 axios.interceptors.request.use(config=>{
@@ -27,6 +32,7 @@ Vue.filter('dateFormat',function(dates){
     let g= date.getSeconds()
     return y + '-' + m + '-' + d+' '+e+':'+f+':'+g;
 })
+
 new Vue({
   router,
   render: h => h(App)

@@ -47,8 +47,11 @@
             </el-form-item>
           </el-form>
         </div>
-        <div class="boxs" :data-index="1">商品参数
-          <el-form>
+        <div class="boxs" :data-index="1">
+          <el-form class="manyNum">
+            <el-form-item v-for="item in manyTableData" :label="item.attr_name" :key="item.attr_id">
+              <el-tag v-for="(item1,j) in item.attr_vals"  closable :key="j" @close="closeMany(j,item)">{{item1}}</el-tag>
+            </el-form-item>
             <el-form-item style="text-align: center">
               <el-button type="primary" @click="preStep" class="pre-step">上一步</el-button>
               <el-button type="primary" @click="nextStep2" class="next-step">下一步</el-button>
@@ -56,8 +59,11 @@
           </el-form>
 
         </div>
-        <div class="boxs" :data-index="2">商品属性
-          <el-form>
+        <div class="boxs" :data-index="2">
+          <el-form >
+            <el-form-item v-for="item in onlyTableData" :label="item.attr_name" :key="item.attr_id">
+              <el-input v-model="item.attr_vals"></el-input>
+            </el-form-item>
             <el-form-item style="text-align: center">
               <el-button type="primary" @click="preStep" class="pre-step">上一步</el-button>
               <el-button type="primary" @click="nextStep3" class="next-step">下一步</el-button>
@@ -108,19 +114,19 @@
                 },
                 rules: {
                     goods_name: [
-                        { required: true, message: '请输入活动名称', trigger: 'blur' }
+                        { required: true, message: '请输入商品名称', trigger: 'blur' }
                     ],
                     goods_price: [
-                        {required: true, message: '请输入活动名称', trigger: 'blur'}
+                        {required: true, message: '请输入商品价格', trigger: 'blur'}
                     ],
                     goods_number: [
-                        {required: true, message: '请输入活动名称', trigger: 'blur' }
+                        {required: true, message: '请输入商品数量', trigger: 'blur' }
                     ],
                     goods_weight: [
-                        {required: true, message: '请输入活动名称', trigger: 'blur' }
+                        {required: true, message: '请输入商品重量', trigger: 'blur' }
                     ],
                     selectedKeys:[
-                        {required: true, message: '请输入活动名称', trigger: 'change' }
+                        {required: true, message: '请选择商品分类', trigger: 'change' }
                     ]
                 },
                 cataList: [],
@@ -130,6 +136,10 @@
                     children: 'children'
                 },
                 step: 0,
+                //动态参数列表
+                manyTableData:[],
+                //静态属性列表
+                onlyTableData:[]
             }
         },
         created() {
@@ -149,12 +159,29 @@
                 $(`.boxs`).removeClass('active')
                 $(`.boxs[data-index=${_this.step}]`).addClass('active')
             },
+            closeMany(j,item1){
+                console.log(item1);
+                item1.attr_vals.splice(j,1);
+                console.log(item1);
+            },
+            closeOnly(j,item){
+                item.attr_vals.splice(j,1);
+            },
             nextStep1(addForm) {
                 console.log(this.$refs);
                 this.$refs[addForm].validate((valid) => {
                     if (valid) {
                         this.step = 1;
-                        this.showBox()
+                        this.$http.get(`categories/${this.cateId}/attributes`,{params:{sel:'many'}}).then((res)=>{
+                            this.manyTableData=res.data.data;
+                            this.manyTableData.forEach((item)=>{
+                                item.attr_vals=item.attr_vals.split(',')
+                            })
+                            this.showBox()
+                        }).catch(()=>{
+                            this.$message.error('获取动态参数失败！')
+                        })
+
                     } else {
                         this.$message.error('请补全基本信息！')
                         return false;
@@ -164,7 +191,13 @@
             },
             nextStep2() {
                 this.step = 2;
-                this.showBox()
+                this.$http.get(`categories/${this.cateId}/attributes`,{params:{sel:'only'}}).then((res)=>{
+                    this.onlyTableData=res.data.data;
+                    console.log(this.onlyTableData);
+                    this.showBox()
+                }).catch(()=>{
+                    this.$message.error('获取动态参数失败！')
+                })
             },
             nextStep3() {
                 this.step = 3;
@@ -183,19 +216,25 @@
                 this.showBox()
             },
             preStep() {
-                this.step--
+                this.step--;
                 this.showBox()
             }
         },
         computed:{
             stepActive(){
                 return this.step;
+            },
+            cateId(){
+                if(this.addForm.selectedKeys.length===3){
+                    return this.addForm.selectedKeys[2]
+                }
+                return null
             }
         }
     }
 </script>
 
-<style scoped>
+<style>
   .el-alert {
     margin: 15px 0 20px;
   }
@@ -220,5 +259,11 @@
 
   #fillInfo .active {
     display: block;
+  }
+  .manyNum .el-form-item .el-form-item__label{
+    float :none;
+  }
+  .manyNum .el-tag{
+    margin:0 10px;
   }
 </style>
