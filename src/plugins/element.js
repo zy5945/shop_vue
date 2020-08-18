@@ -33,7 +33,8 @@ import {
     TabPane,
     Tooltip,
     Steps,
-    Step
+    Step,
+    Upload,
 
 } from 'element-ui'
 
@@ -74,6 +75,7 @@ Vue.use(TabPane);
 Vue.use(Tooltip);
 Vue.use(Steps);
 Vue.use(Step);
+Vue.use(Upload);
 Vue.prototype.$message=Message;
 
 Vue.prototype.$confirm=MessageBox.confirm;
